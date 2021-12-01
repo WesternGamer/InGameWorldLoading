@@ -2,7 +2,7 @@
 using System.Reflection;
 using VRage.Plugins;
 
-namespace SEPluginTemplate
+namespace InGameWorldLoading
 {
     public class Main : IPlugin
     {
