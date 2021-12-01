@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SEPluginTemplate")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("InGameWorldLoading")]
+[assembly: AssemblyDescription("Adds the ability to load, join, or start a new world from ingame.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("WesternGamer")]
-[assembly: AssemblyProduct("SEPluginTemplate")]
+[assembly: AssemblyProduct("InGameWorldLoading")]
 [assembly: AssemblyCopyright("Copyright © WesternGamer 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
