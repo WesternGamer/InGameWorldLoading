@@ -59,7 +59,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
-    <Compile Include="Patches\ExamplePatch.cs" />
+    <Compile Include="Patches\PauseMenu_Patch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +121,7 @@
     <Reference Include="SpaceEngineers.ObjectBuilders.XmlSerializers">
       <HintPath>..\..\Games\steamapps\common\SpaceEngineers\Bin64\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
     <Reference Include="VRage">
       <HintPath>..\..\Games\steamapps\common\SpaceEngineers\Bin64\VRage.dll</HintPath>
     </Reference>
