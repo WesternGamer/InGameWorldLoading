@@ -70,7 +70,8 @@ namespace InGameWorldLoading.Patches
 
         private static void OpenNewGameMenu(MyGuiControlButton button)
         {
-            if (Sync.IsServer)
+            //Sync.IsServer is backwards
+            if (!Sync.IsServer)
             {
                 OpenNewGameMenuInternal();
                 return;
@@ -95,7 +96,8 @@ namespace InGameWorldLoading.Patches
 
         private static void OpenLoadGameMenu(MyGuiControlButton button)
         {
-            if (Sync.IsServer)
+            //Sync.IsServer is backwards
+            if (!Sync.IsServer)
             {
                 OpenLoadGameMenuInternal();
                 return;
@@ -112,7 +114,8 @@ namespace InGameWorldLoading.Patches
 
         private static void OpenJoinGameMenu(MyGuiControlButton button)
         {
-            if (Sync.IsServer)
+            //Sync.IsServer is backwards
+            if (!Sync.IsServer)
             {
                 OpenJoinGameMenuInternal();
                 return;
