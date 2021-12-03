@@ -10,3 +10,5 @@ If you are using my other mod, InGameExit, this plugin will shift the buttons up
 
 ### With InGameExit
 ![Screenshot (2163)](https://user-images.githubusercontent.com/80211714/144529046-9f7efd1e-9c7a-4cfd-8167-14cfaddeda34.png)
+
+Yes, the font is modified, but it will not change how the plugin works.
