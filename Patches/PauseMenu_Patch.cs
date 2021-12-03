@@ -192,30 +192,36 @@ namespace InGameWorldLoading.Patches
         private static void ShowSaveMenu(Action afterMenu, SaveMenuModes modes)
         {
             string message = "";
-            if (modes == SaveMenuModes.NewGame)
-            {
-                message = "Save changes before loading new world?";
-            }
-            else if (modes == SaveMenuModes.LoadGame)
-            {
-                message = "Save changes before loading world?";
-            }
-            else if (modes == SaveMenuModes.JoinGame)
-            {
-                message = "Save changes before joining world?";
-            }
-            else
-            {
-                message = "Save changes?";
-            }
             bool isCampaign = false;
             MyMessageBoxButtonsType buttonsType = MyMessageBoxButtonsType.YES_NO_CANCEL;
-            if (!Sync.IsServer && !MySession.Static.Settings.EnableSaving)
+
+            //Sync.IsServer is backwards
+            if (Sync.IsServer && !MySession.Static.Settings.EnableSaving)
             {
-                message += " All progress from the last checkpoint will be lost.";
+                message += "Exit from Campaign? All progress from the last checkpoint will be lost.";
                 isCampaign = true;
                 buttonsType = MyMessageBoxButtonsType.YES_NO;
             }
+            else
+            {
+                if (modes == SaveMenuModes.NewGame)
+                {
+                    message += "Save changes before loading new world?";
+                }
+                else if (modes == SaveMenuModes.LoadGame)
+                {
+                    message += "Save changes before loading world?";
+                }
+                else if (modes == SaveMenuModes.JoinGame)
+                {
+                    message += "Save changes before joining world?";
+                }
+                else
+                {
+                    message += "Save changes?";
+                }
+            }
+
             MyGuiScreenMessageBox saveMenu = MyGuiSandbox.CreateMessageBox(buttonType: buttonsType, messageText: new StringBuilder(message), messageCaption: MyTexts.Get(MyCommonTexts.MessageBoxCaptionPleaseConfirm), callback: ShowSaveMenuCallback);
             saveMenu.SkipTransition = true;
             saveMenu.InstantClose = false;
@@ -250,7 +256,6 @@ namespace InGameWorldLoading.Patches
                         return;
                     }
                 }
-                
             }
         }
 
@@ -273,7 +278,7 @@ namespace InGameWorldLoading.Patches
             return false;
         }
 
-        enum SaveMenuModes
+        private enum SaveMenuModes
         {
             NewGame = 0,
             LoadGame = 1,
