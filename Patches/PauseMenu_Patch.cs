@@ -1,7 +1,4 @@
 ﻿using HarmonyLib;
-using Sandbox;
-using Sandbox.Engine.Networking;
-using Sandbox.Game.Gui;
 using Sandbox.Game.Multiplayer;
 using Sandbox.Game.Screens;
 using Sandbox.Game.Screens.Helpers;
@@ -11,12 +8,12 @@ using Sandbox.Graphics.GUI;
 using SpaceEngineers.Game.GUI;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using VRage;
 using VRage.FileSystem;
 using VRage.Game;
-using VRage.GameServices;
 using VRage.Utils;
 using VRageMath;
 using static Sandbox.Graphics.GUI.MyGuiScreenMessageBox;
@@ -27,6 +24,11 @@ namespace InGameWorldLoading.Patches
     internal class PauseMenu_Patch
     {
         private static MyGuiScreenMainMenu Instance;
+
+        private static readonly MethodInfo onNewGameMethod = AccessTools.Method(typeof(MyGuiScreenMainMenu), "OnNewGame");
+
+        private static readonly MethodInfo onJoinWorldMethod = AccessTools.Method(typeof(MyGuiScreenMainMenu), "OnJoinWorld");
+
         private static void Postfix(MyGuiScreenMainMenu __instance)
         {
             Instance = __instance;
@@ -73,25 +75,14 @@ namespace InGameWorldLoading.Patches
             //Sync.IsServer is backwards
             if (!Sync.IsServer)
             {
-                OpenNewGameMenuInternal();
+                onNewGameMethod.Invoke(Instance, null);
                 return;
             }
-            ShowSaveMenu(OpenNewGameMenuInternal, SaveMenuModes.NewGame);
-            void OpenNewGameMenuInternal()
-            {
-                if (MySandboxGame.Config.EnableNewNewGameScreen)
-                {
-                    RunWithTutorialCheck(delegate
-                    {
-                        MyGuiSandbox.AddScreen(MyGuiSandbox.CreateScreen<MyGuiScreenSimpleNewGame>(Array.Empty<object>()));
-                    });
-                    return;
-                }
-                RunWithTutorialCheck(delegate
-                {
-                    MyGuiSandbox.AddScreen(MyGuiSandbox.CreateScreen<MyGuiScreenNewGame>(new object[3] { true, true, true }));
-                });
-            }
+
+            ShowSaveMenu(delegate 
+            { 
+                onNewGameMethod.Invoke(Instance, null); 
+            }, SaveMenuModes.NewGame);
         }
 
         private static void OpenLoadGameMenu(MyGuiControlButton button)
@@ -99,17 +90,14 @@ namespace InGameWorldLoading.Patches
             //Sync.IsServer is backwards
             if (!Sync.IsServer)
             {
-                OpenLoadGameMenuInternal();
+                MyGuiSandbox.AddScreen(new MyGuiScreenLoadSandbox());
                 return;
             }
-            ShowSaveMenu(OpenLoadGameMenuInternal, SaveMenuModes.LoadGame);
-            void OpenLoadGameMenuInternal()
-            {
-                RunWithTutorialCheck(delegate
-                {
-                    MyGuiSandbox.AddScreen(new MyGuiScreenLoadSandbox());
-                });
-            }
+
+            ShowSaveMenu(delegate 
+            { 
+                MyGuiSandbox.AddScreen(new MyGuiScreenLoadSandbox()); 
+            }, SaveMenuModes.LoadGame);
         }
 
         private static void OpenJoinGameMenu(MyGuiControlButton button)
@@ -117,76 +105,14 @@ namespace InGameWorldLoading.Patches
             //Sync.IsServer is backwards
             if (!Sync.IsServer)
             {
-                OpenJoinGameMenuInternal();
+                onJoinWorldMethod.Invoke(Instance, null);
                 return;
             }
-            ShowSaveMenu(OpenJoinGameMenuInternal, SaveMenuModes.JoinGame);
+            ShowSaveMenu(delegate 
+            { 
+                onJoinWorldMethod.Invoke(Instance, null); 
+            }, SaveMenuModes.JoinGame);
 
-            void OpenJoinGameMenuInternal()
-            {
-                RunWithTutorialCheck(delegate
-                {
-                    if (MyGameService.IsOnline)
-                    {
-                        MyGameService.Service.RequestPermissions(Permissions.Multiplayer, attemptResolution: true, delegate (PermissionResult granted)
-                        {
-                            switch (granted)
-                            {
-                                case PermissionResult.Granted:
-                                    MyGameService.Service.RequestPermissions(Permissions.UGC, attemptResolution: true, delegate (PermissionResult ugcGranted)
-                                    {
-                                        switch (ugcGranted)
-                                        {
-                                            case PermissionResult.Granted:
-                                                MyGameService.Service.RequestPermissions(Permissions.CrossMultiplayer, attemptResolution: true, delegate (PermissionResult crossGranted)
-                                                {
-                                                    MyGuiScreenJoinGame myGuiScreenJoinGame = new MyGuiScreenJoinGame(crossGranted == PermissionResult.Granted);
-                                                    myGuiScreenJoinGame.Closed += JoinGameScreenClosed;
-                                                    MyGuiSandbox.AddScreen(myGuiScreenJoinGame);
-                                                });
-                                                break;
-                                            case PermissionResult.Error:
-                                                MySandboxGame.Static.Invoke(delegate
-                                                {
-                                                    MyGuiSandbox.Show(MyCommonTexts.XBoxPermission_MultiplayerError, default, MyMessageBoxStyleEnum.Info);
-                                                }, "New Game screen");
-                                                break;
-                                        }
-                                    });
-                                    break;
-                                case PermissionResult.Error:
-                                    MyGuiSandbox.Show(MyCommonTexts.XBoxPermission_MultiplayerError, default, MyMessageBoxStyleEnum.Info);
-                                    break;
-                            }
-                        });
-                    }
-                    else
-                    {
-                        MyGuiSandbox.AddScreen(MyGuiSandbox.CreateMessageBox(MyMessageBoxStyleEnum.Error, MyMessageBoxButtonsType.OK, messageCaption: MyTexts.Get(MyCommonTexts.MessageBoxCaptionError), messageText: new StringBuilder().AppendFormat(MyTexts.GetString(MyGameService.IsActive ? MyCommonTexts.SteamIsOfflinePleaseRestart : MyCommonTexts.ErrorJoinSessionNoUser), MySession.GameServiceName)));
-                    }
-                });
-            }
-        }
-
-        private static void JoinGameScreenClosed(MyGuiScreenBase source, bool isUnloading)
-        {
-            if (source.Cancelled)
-            {
-                Instance.State = MyGuiScreenState.OPENING;
-                source.Closed -= JoinGameScreenClosed;
-            }
-        }
-
-        private static void RunWithTutorialCheck(Action afterTutorial)
-        {
-            if (MySandboxGame.Config.FirstTimeTutorials)
-            {
-                MyGuiSandbox.AddScreen(new MyGuiScreenTutorialsScreen(afterTutorial));
-            }
-            else
-            {
-                afterTutorial();
-            }
         }
 
         private static void ShowSaveMenu(Action afterMenu, SaveMenuModes modes)
