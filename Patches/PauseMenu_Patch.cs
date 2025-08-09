@@ -188,20 +188,7 @@ namespace InGameWorldLoading.Patches
         //Checks if my In Game Exit Plugin is enabled so it's ui won't interfere with this plugin.
         public static bool IsPluginLoaded()
         {
-            XmlDocument xml = new XmlDocument();
-            xml.Load(Path.Combine(MyFileSystem.ExePath, "Plugins\\config.xml"));
-
-            XmlNodeList xnList = xml.SelectNodes("PluginConfig/Plugins/Id");
-            foreach (XmlNode xn in xnList)
-            {
-                string pluginName = xn.InnerText;
-
-                if (pluginName == "WesternGamer/InGameExit")
-                {
-                    return true;
-                }
-            }
-            return false;
+            return Type.GetType("InGameExit.Main") != null;
         }
 
         private enum SaveMenuModes
