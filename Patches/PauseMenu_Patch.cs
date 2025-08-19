@@ -188,7 +188,7 @@ namespace InGameWorldLoading.Patches
         //Checks if my In Game Exit Plugin is enabled so it's ui won't interfere with this plugin.
         public static bool IsPluginLoaded()
         {
-            return Type.GetType("InGameExit.Main") != null;
+            return AccessTools.TypeByName("InGameExit.Main") != null;
         }
 
         private enum SaveMenuModes
